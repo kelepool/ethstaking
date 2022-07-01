@@ -11,6 +11,8 @@ Proxy Contract: [0xACBA4cFE7F30E64dA787c6Dc7Dc34f623570e758](https://etherscan.i
 
 Logic contracts: [0xeee5dd6c3d57207d08ce090b62d34d67620ed44a](https://etherscan.io/address/0xeee5dd6c3d57207d08ce090b62d34d67620ed44a#code)
 
+## Audit
+[SlowMist Audit Report](./SlowMist%20Audit%20Report%20-%20KelePoolStaking.pdf)
 ## Introduction
 
 #### Stake ≥ 32 ETH
