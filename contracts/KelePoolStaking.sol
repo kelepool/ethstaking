@@ -1105,6 +1105,7 @@ contract KelePoolStaking is Initializable, UUPSUpgradeable {
 
     // change fee
     function changeFee(uint256 fee) public onlyOperator {
+        require(fee > 0 && fee <= 32e18, "Error fee");
         _system.fee = fee;
         emit OnFeeChanged(msg.sender, fee);
     }
@@ -1149,3 +1150,4 @@ contract KelePoolStaking is Initializable, UUPSUpgradeable {
         _;
     }
 }
+
