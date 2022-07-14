@@ -9,7 +9,7 @@ The contract adopts the upgradeable solution of the open source project [Openzep
 
 Proxy Contract: [0xACBA4cFE7F30E64dA787c6Dc7Dc34f623570e758](https://etherscan.io/address/0xACBA4cFE7F30E64dA787c6Dc7Dc34f623570e758#code)
 
-Logic contracts: [0xeee5dd6c3d57207d08ce090b62d34d67620ed44a](https://etherscan.io/address/0xeee5dd6c3d57207d08ce090b62d34d67620ed44a#code)
+Logic contracts: [0x3b27417d971d6aec8a8406143c507095f729bff0](https://etherscan.io/address/0x3b27417d971d6aec8a8406143c507095f729bff0#code)
 
 ## Audit
 [SlowMist Audit Report](./SlowMist%20Audit%20Report%20-%20KelePoolStaking.pdf)
@@ -52,7 +52,7 @@ If the staked amount is less than 32 ETH, you can stake a minimum amount of 0.01
 
 代理合约：[0xACBA4cFE7F30E64dA787c6Dc7Dc34f623570e758](https://etherscan.io/address/0xACBA4cFE7F30E64dA787c6Dc7Dc34f623570e758#code)
 
-逻辑合约：[0xeee5dd6c3d57207d08ce090b62d34d67620ed44a](https://etherscan.io/address/0xeee5dd6c3d57207d08ce090b62d34d67620ed44a#code)
+逻辑合约：[0x3b27417d971d6aec8a8406143c507095f729bff0](https://etherscan.io/address/0x3b27417d971d6aec8a8406143c507095f729bff0#code)
 
 ## 主要功能
 
