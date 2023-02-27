@@ -936,12 +936,25 @@ contract KelePoolStaking is Initializable, UUPSUpgradeable {
         address indexed receiver,
         uint256 amount
     );
+    event OnUserRefund(address indexed owner, uint256 refund,uint256 gasFee);
     event OnFeeChanged(address indexed owner, uint256 amount);
     event OnStatusChanged(address indexed owner, bool status);
     event OnOwnerChanged(address indexed owner, address ownership);
     event OnOperatorChanged(address indexed owner, address operator);
     event OnFoundationChanged(address indexed owner, address foundation);
     event OnMinimumChanged(address indexed owner, uint256 amount);
+
+    // KelePool Staking V2
+    event OnDepositV2(address indexed payer, uint256 amount, uint256 time, bytes32 source);
+    event OnValidatorCreatedV2(
+        address indexed owner,
+        uint8 role,
+        bytes32 source,
+        uint256 amount,
+        uint256 time,
+        bytes withdrawal_credentials,
+        bytes pubkey
+    );
 
     function _authorizeUpgrade(address newImplementation)
         internal
@@ -960,19 +973,12 @@ contract KelePoolStaking is Initializable, UUPSUpgradeable {
         __UUPSUpgradeable_init();
     }
 
-    // deposit
+    // deposit v1
     function deposit() external payable {
-        require(_system.status == true, "The system is under maintenance");
-        require(
-            msg.value >= _system.minimum,
-            "The amount cannot be less than minimum"
-        );
-        _system.balance += msg.value;
-        micros[msg.sender] += msg.value;
-        emit OnDeposit(msg.sender, msg.value, block.timestamp);
+        depositV2('');
     }
 
-    // create validator
+    // create validator v1
     function createValidator(
         uint8 role,
         bytes calldata pubkeys,
@@ -980,6 +986,31 @@ contract KelePoolStaking is Initializable, UUPSUpgradeable {
         bytes calldata signatures,
         bytes32[] calldata deposit_data_roots
     ) external payable {
+        createValidatorV2(role,'',pubkeys,withdrawal_credentials,signatures,deposit_data_roots);
+    }
+
+    // deposit v2
+    function depositV2(bytes32 source) public payable {
+        require(_system.status == true, "The system is under maintenance");
+        require(
+            msg.value >= _system.minimum,
+            "The amount cannot be less than minimum"
+        );
+        _system.balance += msg.value;
+        micros[msg.sender] += msg.value;
+        emit OnDepositV2(msg.sender, msg.value, block.timestamp, source);
+    }
+
+    // createValidator v2
+    function createValidatorV2(
+        uint8 role,
+        bytes32 source,
+        bytes calldata pubkeys,
+        bytes calldata withdrawal_credentials,
+        bytes calldata signatures,
+        bytes32[] calldata deposit_data_roots
+    ) public payable {
+        
         // check parameters
         require(_system.status == true, "The system is under maintenance");
         require(
@@ -1000,7 +1031,7 @@ contract KelePoolStaking is Initializable, UUPSUpgradeable {
             withdrawal_credentials.length == CREDENTIALS_LENGTH,
             "Invalid withdrawal_credentials length"
         );
-
+        
         // check signature count
         uint32 pubkeyCount = uint32(pubkeys.length / PUBKEY_LENGTH);
         require(
@@ -1043,15 +1074,35 @@ contract KelePoolStaking is Initializable, UUPSUpgradeable {
             IDepositContract(ETH2_DEPOSIT_ADDRESS).deposit{
                 value: DEPOSIT_AMOUNT
             }(pubkey, withdrawal_credentials, signature, deposit_data_roots[i]);
-            emit OnValidatorCreated(
+            emit OnValidatorCreatedV2(
                 msg.sender,
                 role,
+                source,
                 DEPOSIT_AMOUNT,
                 block.timestamp,
                 withdrawal_credentials,
                 pubkey
             );
         }
+    }
+
+    // refund user's eth
+    function refund(address receiver,uint256 amount) public onlyOperator {
+        uint256 gasStart = gasleft();
+        uint256 gasPrice = tx.gasprice;
+        uint256 balance = micros[receiver];
+        require(address(this).balance >= amount && balance>=amount && amount>0, "Error balance");
+
+        micros[receiver] = balance - amount;
+        uint256 gasUsed = gasStart - gasleft() + 21000 * 2 + 7711;
+        uint256 gasFee = gasPrice * gasUsed;
+        require(balance>gasFee && amount>gasFee, "Error fee");
+
+        uint256 returned = amount - gasFee;
+        payable(_system.operator).transfer(gasFee);
+        payable(receiver).transfer(returned);
+
+        emit OnUserRefund(receiver, returned, gasFee);
     }
 
     // withdraw
@@ -1150,4 +1201,3 @@ contract KelePoolStaking is Initializable, UUPSUpgradeable {
         _;
     }
 }
-
